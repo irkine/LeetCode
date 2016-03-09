@@ -1,6 +1,5 @@
-﻿module Itenerary
+﻿module Itenerary // 332. Reconstruct Itenerary
 
-// 332. Reconstruct Itinerary
 let reconstruct depart tickets = 
     let legs =
         tickets

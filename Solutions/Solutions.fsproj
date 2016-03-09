@@ -53,7 +53,8 @@
     <Compile Include="AssemblyInfo.fs" />
     <Compile Include="Itenerary.fs" />
     <Compile Include="Balloons.fs" />
-    <Compile Include="Balloons2.fs" />
+    <Compile Include="TwoNonDuplicated.fs" />
+    <Compile Include="CoinChange.fs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />

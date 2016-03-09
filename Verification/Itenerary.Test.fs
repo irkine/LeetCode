@@ -1,5 +1,6 @@
-﻿module Itenerary.Tests
+﻿module Itenerary.Test
 
+open Test.Common
 open Itenerary
 open Xunit
 
@@ -8,8 +9,8 @@ open Xunit
 [<InlineData("JFK,SFO;JFK,ATL;SFO,ATL;ATL,JFK;ATL,SFO", "JFK,ATL,JFK,SFO,ATL,SFO")>]
 let recon (tickets : string) (expected : string) =
     let t =
-        tickets.Split([|';'|])
-        |> Seq.ofArray
+        tickets
+        |> split ';'
         |> Seq.map (fun t ->
             let s = t.Split([|','|])
             (s.[0], s.[1]))
