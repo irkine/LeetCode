@@ -1,4 +1,4 @@
-﻿module Balloons.Test
+﻿module Test.Balloons
 
 open Test.Common
 open Balloons
@@ -15,7 +15,7 @@ open Xunit
 [<InlineData( "2 3 2 1 2 3 2" , 70  )>]
 [<InlineData( "5 2 2 2"       , 55  )>]
 [<InlineData( "2 2 2 5"       , 55  )>]
-let pop (balloons : string) expected =
+let mainline (balloons : string) expected =
     let b =
         balloons
         |> split ' '

@@ -65,26 +65,27 @@ let popEm balloons =
         let possibleTotals =
             match b with
             | { L = Some(l) } & { R = Some(r) } ->
-                [
+                [|
                     l.Value * b.Value           + b.Value * r.Value + b.Value
                     l.Value * b.Value * r.Value + l.Value * r.Value + l.Value
                     l.Value * b.Value * r.Value + l.Value * r.Value + r.Value
-                ]
+                |]
 
             | { L = Some(l) } -> 
-                [
+                [|
                     l.Value * b.Value + l.Value
                     l.Value * b.Value + b.Value
-                ]
+                |]
 
             | { R = Some(r) } ->
-                [
+                [|
                     r.Value * b.Value + r.Value
                     r.Value * b.Value + b.Value
-                ]
-            | _ -> [ b.Value ]
+                |]
+
+            | _ -> [| b.Value |]
             
-        total + (List.max possibleTotals)
+        total + (Array.max possibleTotals)
 
     match convert balloons with
     | Some(bl) ->

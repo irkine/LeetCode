@@ -56,9 +56,9 @@
     <Compile Include="AssemblyInfo.fs" />
     <Content Include="packages.config" />
     <Compile Include="Test.Common.fs" />
-    <Compile Include="Itenerary.Test.fs" />
-    <Compile Include="Balloons.Test.fs" />
-    <Compile Include="CoinChange.Test.fs" />
+    <Compile Include="Itenerary.fs" />
+    <Compile Include="Balloons.fs" />
+    <Compile Include="CoinChange.fs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">

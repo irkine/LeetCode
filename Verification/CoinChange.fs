@@ -1,4 +1,4 @@
-﻿module CoinChange.Test
+﻿module Test.CoinChange
 
 open Test.Common
 open CoinChange
