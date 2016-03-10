@@ -1,7 +1,7 @@
 ﻿module Test.CoinChange
 
-open Test.Common
 open CoinChange
+open Test.Common
 open Xunit
 
 let convert str =

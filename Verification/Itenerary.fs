@@ -1,7 +1,7 @@
 ﻿module Test.Itenerary
 
-open Test.Common
 open Itenerary
+open Test.Common
 open Xunit
 
 [<Theory>]

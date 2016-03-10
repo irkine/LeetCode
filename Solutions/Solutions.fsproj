@@ -55,6 +55,7 @@
     <Compile Include="Balloons.fs" />
     <Compile Include="TwoNonDuplicated.fs" />
     <Compile Include="CoinChange.fs" />
+    <Compile Include="HouseRobber.fs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />

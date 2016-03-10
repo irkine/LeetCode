@@ -1,7 +1,7 @@
 ﻿module Test.Balloons
 
-open Test.Common
 open Balloons
+open Test.Common
 open Xunit
 
 [<Theory>]
