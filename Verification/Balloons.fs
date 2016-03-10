@@ -3,6 +3,7 @@
 open Balloons
 open Test.Common
 open Xunit
+open Swensen.Unquote
 
 [<Theory>]
 [<InlineData( "3 1 5 8"       , 167 )>]
@@ -22,6 +23,4 @@ let mainline (balloons : string) expected =
         |> Seq.map System.Int32.Parse
         |> Seq.toList
 
-    let actual = popEm b
-
-    Assert.Equal(expected, actual)
+    test <@ expected = popEm b @>

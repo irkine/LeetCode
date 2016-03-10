@@ -3,6 +3,7 @@
 open Itenerary
 open Test.Common
 open Xunit
+open Swensen.Unquote
 
 [<Theory>]
 [<InlineData("MUC,LHR;JFK,MUC;SFO,SJC;LHR,SFO", "JFK,MUC,LHR,SFO,SJC")>]
@@ -21,6 +22,4 @@ let mainline (tickets : string) (expected : string) =
         |> split ','
         |> Array.toList
 
-    let actual = reconstruct "JFK" t
-
-    Assert.Equal<string list>(e, actual)
+    test <@ e = reconstruct "JFK" t @>

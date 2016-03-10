@@ -3,6 +3,7 @@
 open CoinChange
 open Test.Common
 open Xunit
+open Swensen.Unquote
 
 let convert str =
     str
@@ -11,20 +12,17 @@ let convert str =
     |> List.ofSeq
 
 [<Theory>]
-[<InlineData( "1 2 5"  , 12  , "5 5 2"                         )>]
-[<InlineData( "2 5 12" , 11  , "5 2 2 2"                       )>]
-[<InlineData( "1 3 4"  , 10  , "4 4 1 1"                       )>]
-[<InlineData( "2 3 5"  , 14  , "5 5 2 2"                       )>]
+[<InlineData( "1 2 5"  , 12  , "2 5 5"                         )>]
+[<InlineData( "2 5 12" , 11  , "2 2 2 5"                       )>]
+[<InlineData( "1 3 4"  , 10  , "1 1 4 4"                       )>]
+[<InlineData( "2 3 5"  , 14  , "2 2 5 5"                       )>]
 [<InlineData( "10"     , 100 , "10 10 10 10 10 10 10 10 10 10" )>]
 let mainline (coins, amount, expectedChange) =
 
     let input = convert coins
     let expected = convert expectedChange
 
-    let actual = MakeChange input amount
-    Assert.Equal<int[]>(
-        expected |> Array.ofList,
-        actual |> List.rev |> Array.ofList)
+    test <@ expected = MakeChange input amount @>
 
 [<Theory>]
 [<InlineData( "2 5" , 3   )>]

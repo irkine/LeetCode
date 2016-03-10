@@ -3,6 +3,7 @@
 open HouseRobber
 open Test.Common
 open Xunit
+open Swensen.Unquote
 
 [<Theory>]
 [<InlineData("0 1 2 3 4 5 6", 12)>]
@@ -16,8 +17,7 @@ let mainline (houses, expectedTotal) =
         |> Seq.map System.Int32.Parse
         |> Seq.toList
 
-    let actual = rob input
-    Assert.Equal(expectedTotal, actual)
+    test <@ expectedTotal = rob input @>
 
 [<Fact>]
 let ``time complexity`` () =
@@ -31,13 +31,13 @@ let ``time complexity`` () =
         rob input |> ignore
         w.Stop()
 
-        w.Elapsed
+        w.Elapsed.TotalMilliseconds
 
     let t1 = time 10
     let t2 = time 100
     let t3 = time 1000
     let t4 = time 1000000
 
-    Assert.True( t2.TotalMilliseconds <= t1.TotalMilliseconds * 15.0   , "Bad gap 10 -> 100"      )
-    Assert.True( t3.TotalMilliseconds <= t2.TotalMilliseconds * 15.0   , "Bad gap 100 -> 1000"    )
-    Assert.True( t4.TotalMilliseconds <= t3.TotalMilliseconds * 1500.0 , "Bad gap 1000 -> 100000" )
+    test <@ t2 <= t1 * 15.0   @>
+    test <@ t3 <= t2 * 15.0   @>
+    test <@ t4 <= t3 * 1500.0 @>
