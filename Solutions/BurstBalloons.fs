@@ -1,4 +1,4 @@
-﻿module Balloons // 312. Burst Balloons
+﻿module BurstBalloons // 312. Burst Balloons
 
 type Balloon = {
     Value : int;

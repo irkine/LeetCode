@@ -1,6 +1,6 @@
-﻿module Test.Balloons
+﻿module Test.BurstBalloons
 
-open Balloons
+open BurstBalloons
 open Test.Common
 open Xunit
 open Swensen.Unquote

@@ -56,7 +56,7 @@
     <Compile Include="AssemblyInfo.fs" />
     <Content Include="packages.config" />
     <Compile Include="Test.Common.fs" />
-    <Compile Include="Balloons.fs" />
+    <Compile Include="BurstBalloons.fs" />
     <Compile Include="CoinChange.fs" />
     <Compile Include="HouseRobber.fs" />
     <Compile Include="Itenerary.fs" />
