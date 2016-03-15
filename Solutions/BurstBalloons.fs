@@ -43,6 +43,34 @@ let popEm balloons =
         | { R = Some(r) } -> if b.Value > r.Value then b else findPeak r
         | _ -> b
 
+    let consumePeak b total =
+        let totalRun b getNext =
+            let rec loop b getNext total =
+                match getNext b with
+                | Some(n) -> loop n getNext (total + n.Value)
+                | None -> total
+            
+            loop b getNext 0
+
+        let rec loop b totalLeft totalRight total =
+            match b with
+            | { L = Some(l) ; R = Some(r) } when totalLeft + totalRight <= l.Value * r.Value ->
+                let newTotal = total + l.Value * b.Value * r.Value
+
+                l.R <- Some(r)
+                r.L <- Some(l)
+
+                if l.Value > r.Value
+                then loop l (totalLeft - l.Value) totalRight             newTotal
+                else loop r totalLeft             (totalRight - r.Value) newTotal
+
+            | _ -> (total, b)
+
+        let totalLeft  = totalRun b (fun b -> b.L)
+        let totalRight = totalRun b (fun b -> b.R)
+
+        loop b totalLeft totalRight total
+
     let rec rollUpLeft b total =
         match b with
         | { L = Some(l1) } & { L = Some({ L = Some(l2) }) } ->
@@ -60,7 +88,7 @@ let popEm balloons =
 
             rollUpRight b (total + b.Value * r1.Value * r2.Value)
         | _ -> total
-    
+
     let finalize b total =
         let possibleTotals =
             match b with
@@ -91,8 +119,8 @@ let popEm balloons =
     | Some(bl) ->
         let totalFlat = flatten bl 0
 
-        let peak = findPeak bl
-        let totalLeft = rollUpLeft peak totalFlat
+        let (totalConsume, peak) = consumePeak (findPeak bl) totalFlat
+        let totalLeft = rollUpLeft peak totalConsume
         let totalRight = rollUpRight peak totalLeft
 
         finalize peak totalRight
