@@ -20,6 +20,14 @@ open Swensen.Unquote
 [<InlineData( "6 5 4 3 2 1"   , 252  )>]
 [<InlineData( "9 2 14 5 3"    , 1053 )>]
 [<InlineData( "2 3 2 1 2 3 2" , 70   )>]
+[<InlineData( "2 5 5 5 2"     , 201  )>]
+[<InlineData( "2 5 5 3"       , 114  )>]
+[<InlineData( "3 5 5 2"       , 114  )>]
+[<InlineData( "3 5 4 2"       , 93   )>]
+[<InlineData( "2 1 1 1 2"     , 14   )>]
+[<InlineData( "2 1 1 1 2"     , 14   )>]
+[<InlineData( "3 1 1 2"       , 18   )>]
+[<InlineData( "2 1 1 3"       , 18   )>]
 let mainline (balloons : string) expected =
     let b =
         balloons

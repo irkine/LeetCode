@@ -1,5 +1,7 @@
 ﻿module BurstBalloons // 312. Burst Balloons
 
+open System
+
 type Balloon = {
     Value : int;
     mutable L : Balloon option;
@@ -7,6 +9,18 @@ type Balloon = {
 }
 
 let popEm balloons =
+    let rec movl count b =
+        match b with
+        | { L = Some(l) } when count > 0-> movl (count-1) l
+        | _ when count > 0 -> None
+        | _ -> Some(b)
+
+    let rec movr count b =
+        match b with
+        | { R = Some(r) } when count > 0 -> movr (count-1) r
+        | _ when count > 0 -> None
+        | _ -> Some(b)
+
     let convert balloons =
         let rec rlink balloons =
             match balloons with
@@ -27,21 +41,77 @@ let popEm balloons =
 
         balloons |> rlink |> llink
 
-    let rec flatten b total =
+    let handleRun b findMiddle =
+        let rec loop b v e1 getNext getPrev count =
+            match (e1, getNext 1 b) with
+            
+            // Walk
+            | ( _ , Some(n) ) when n.Value = v ->
+                loop n v e1 getNext getPrev (count+1)
+
+            // Left Greater
+            | ( Some(e), Some(n) ) when e.Value < n.Value ->
+                if findMiddle
+                then getPrev ((count - 1 + count % 2)/2) b
+                else getPrev 1 n
+
+            // Left Only
+            | ( None, Some(n) ) when count % 2 = 0 ->
+                if findMiddle
+                then getPrev ((count - 1 + count % 2)/2) b
+                else getPrev 1 n
+
+            // Right Only or Greater
+            | _ ->
+                if findMiddle
+                then getPrev (count / 2) b
+                else getPrev (count - 1) b
+
         match b with
-        | { L = Some(l) ; R = Some(r) } when l.Value > b.Value && b.Value < r.Value ->
-            l.R <- Some(r)
-            r.L <- Some(l)
+        | { L = Some(l) } when l.Value = b.Value -> loop b b.Value b.R movl movr 1
+        | { R = Some(r) } when r.Value = b.Value -> loop b b.Value b.L movr movl 1
+        | _ -> Some(b)
+        
+    let rec flatten b total = // Need to manage state-change, dec -> inc, not rely on immediate left/right ( 2 1 1 2 )
+        let findMinima b =
+            let rec loop b desc = 
+                match b with
+                | { R = Some(r) } ->
+                    if b.Value < r.Value && desc then handleRun b false
+                    else if b.Value > r.Value then loop r true
+                    else loop r desc
+                | _ -> None
 
-            flatten l (total + l.Value * b.Value * r.Value)
+            loop b false
 
-        | { R = Some(r) } -> flatten r total
+        let rec consumeMinima b total =
+            match b with
+            | { L = Some(l) ; R = Some(r) } when l >= b && b <= r ->
+                l.R <- Some(r)
+                r.L <- Some(l)
+
+                let next = 
+                    if l.Value < r.Value then l
+                    else r
+                
+                consumeMinima next (total + l.Value * b.Value * r.Value)
+
+            | _ -> (b, total)
+
+        match findMinima b with
+        | Some(m) ->
+            let (bl, tl) = consumeMinima m total
+            flatten bl tl
+            
         | _ -> total
 
-    let rec findPeak b =
-        match b with
-        | { R = Some(r) } -> if b.Value > r.Value then b else findPeak r
-        | _ -> b
+    let findPeak b =
+        let rec loop b =
+            match b with
+            | { R = Some(r) } -> if b.Value > r.Value then b else loop r
+            | _ -> b
+
+        (handleRun (loop b) true).Value
 
     let consumePeak b total =
         let totalRun b getNext =
@@ -116,10 +186,10 @@ let popEm balloons =
         total + (Array.max possibleTotals)
 
     match convert balloons with
-    | Some(bl) ->
-        let totalFlat = flatten bl 0
+    | Some(b) ->
+        let totalFlat = flatten b 0
 
-        let (totalConsume, peak) = consumePeak (findPeak bl) totalFlat
+        let (totalConsume, peak) = consumePeak (findPeak b) totalFlat
         let totalLeft = rollUpLeft peak totalConsume
         let totalRight = rollUpRight peak totalLeft
 
