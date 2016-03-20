@@ -9,17 +9,14 @@ type Balloon = {
 }
 
 let popEm balloons =
-    let rec movl count b =
-        match b with
-        | { L = Some(l) } when count > 0-> movl (count-1) l
-        | _ when count > 0 -> None
-        | _ -> Some(b)
+    let rec repeat count fxn b =
+         match fxn b with
+         | Some(n) when count > 0 -> repeat (count-1) fxn n
+         | _ when count > 0 -> None
+         | _ -> Some(b)
 
-    let rec movr count b =
-        match b with
-        | { R = Some(r) } when count > 0 -> movr (count-1) r
-        | _ when count > 0 -> None
-        | _ -> Some(b)
+    let rec movl count = repeat count (fun b -> b.L)
+    let rec movr count = repeat count (fun b -> b.R)
 
     let convert balloons =
         let rec rlink balloons =
@@ -28,15 +25,17 @@ let popEm balloons =
             | _ -> None
         
         let llink cursor =
-            let rec loop cursor head =
+            let rec loop cursor head max =
                 match cursor.R with
                 | Some(n) ->
                     n.L <- Some(cursor)
-                    loop n head
-                | _ -> head
+                    let newMax = Array.maxBy (fun b -> b.Value) [| max ; n |]
+                    loop n head newMax
+
+                | _ -> (head, max)
 
             match cursor with
-            | Some(c) -> Some(loop c c)
+            | Some(c) -> Some(loop c c c)
             | None -> None
 
         balloons |> rlink |> llink
@@ -66,13 +65,13 @@ let popEm balloons =
                 if findMiddle
                 then getPrev (count / 2) b
                 else getPrev (count - 1) b
-
+        
         match b with
         | { L = Some(l) } when l.Value = b.Value -> loop b b.Value b.R movl movr 1
         | { R = Some(r) } when r.Value = b.Value -> loop b b.Value b.L movr movl 1
         | _ -> Some(b)
         
-    let rec flatten b total = // Need to manage state-change, dec -> inc, not rely on immediate left/right ( 2 1 1 2 )
+    let rec flatten b total =
         let findMinima b =
             let rec loop b desc = 
                 match b with
@@ -90,10 +89,7 @@ let popEm balloons =
                 l.R <- Some(r)
                 r.L <- Some(l)
 
-                let next = 
-                    if l.Value < r.Value then l
-                    else r
-                
+                let next = if l.Value < r.Value then l else r
                 consumeMinima next (total + l.Value * b.Value * r.Value)
 
             | _ -> (b, total)
@@ -105,15 +101,7 @@ let popEm balloons =
             
         | _ -> total
 
-    let findPeak b =
-        let rec loop b =
-            match b with
-            | { R = Some(r) } -> if b.Value > r.Value then b else loop r
-            | _ -> b
-
-        (handleRun (loop b) true).Value
-
-    let consumePeak b total =
+    let consumePeak peak total =
         let totalRun b getNext =
             let rec loop b getNext total =
                 match getNext b with
@@ -135,6 +123,8 @@ let popEm balloons =
                 else loop r totalLeft             (totalRight - r.Value) newTotal
 
             | _ -> (total, b)
+
+        let b = (handleRun peak true).Value
 
         let totalLeft  = totalRun b (fun b -> b.L)
         let totalRight = totalRun b (fun b -> b.R)
@@ -186,10 +176,10 @@ let popEm balloons =
         total + (Array.max possibleTotals)
 
     match convert balloons with
-    | Some(b) ->
+    | Some((b, p)) ->
         let totalFlat = flatten b 0
 
-        let (totalConsume, peak) = consumePeak (findPeak b) totalFlat
+        let (totalConsume, peak) = consumePeak p totalFlat
         let totalLeft = rollUpLeft peak totalConsume
         let totalRight = rollUpRight peak totalLeft
 
