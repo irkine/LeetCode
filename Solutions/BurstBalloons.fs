@@ -25,14 +25,14 @@ let popEm balloons =
             | _ -> None
         
         let llink cursor =
-            let rec loop cursor head max =
+            let rec loop cursor head peak =
                 match cursor.R with
                 | Some(n) ->
                     n.L <- Some(cursor)
-                    let newMax = Array.maxBy (fun b -> b.Value) [| max ; n |]
-                    loop n head newMax
+                    let peak' = Array.maxBy (fun b -> b.Value) [| peak ; n |]
+                    loop n head peak'
 
-                | _ -> (head, max)
+                | _ -> (head, peak)
 
             match cursor with
             | Some(c) -> Some(loop c c c)
@@ -71,7 +71,7 @@ let popEm balloons =
         | { R = Some(r) } when r.Value = b.Value -> loop b b.Value b.L movr movl 1
         | _ -> Some(b)
         
-    let rec flatten b total =
+    let rec flatten b (p, total) =
         let findMinima b =
             let rec loop b desc = 
                 match b with
@@ -96,12 +96,12 @@ let popEm balloons =
 
         match findMinima b with
         | Some(m) ->
-            let (bl, tl) = consumeMinima m total
-            flatten bl tl
-            
-        | _ -> total
+            let (b', total') = consumeMinima m total
+            flatten b' (p, total')
 
-    let consumePeak peak total =
+        | _ -> (p, total)
+
+    let consumePeak (peak, total) =
         let totalRun b getNext =
             let rec loop b getNext total =
                 match getNext b with
@@ -122,7 +122,7 @@ let popEm balloons =
                 then loop l (totalLeft - l.Value) totalRight             newTotal
                 else loop r totalLeft             (totalRight - r.Value) newTotal
 
-            | _ -> (total, b)
+            | _ -> (b, total)
 
         let b = (handleRun peak true).Value
 
@@ -131,25 +131,25 @@ let popEm balloons =
 
         loop b totalLeft totalRight total
 
-    let rec rollUpLeft b total =
-        match b with
+    let rec rollUpLeft (p, total) =
+        match p with
         | { L = Some(l1) } & { L = Some({ L = Some(l2) }) } ->
-            b.L <- Some(l2)
-            l2.R <- Some(b)
+            p.L <- Some(l2)
+            l2.R <- Some(p)
 
-            rollUpLeft b (total + l2.Value * l1.Value * b.Value)
-        | _ -> total
+            rollUpLeft (p, (total + l2.Value * l1.Value * p.Value))
+        | _ -> (p, total)
 
-    let rec rollUpRight b total =
-        match b with
+    let rec rollUpRight (p, total) =
+        match p with
         | { R = Some(r1) } & { R = Some({ R = Some(r2) }) } ->
-            b.R <- Some(r2)
-            r2.L <- Some(b)
+            p.R <- Some(r2)
+            r2.L <- Some(p)
 
-            rollUpRight b (total + b.Value * r1.Value * r2.Value)
-        | _ -> total
+            rollUpRight (p, (total + p.Value * r1.Value * r2.Value))
+        | _ -> (p, total)
 
-    let finalize b total =
+    let finalize (b, total) =
         let possibleTotals =
             match b with
             | { L = Some(l) } & { R = Some(r) } ->
@@ -175,14 +175,13 @@ let popEm balloons =
             
         total + (Array.max possibleTotals)
 
+    let compute b =
+        flatten b
+        >> consumePeak
+        >> rollUpLeft
+        >> rollUpRight
+        >> finalize
+
     match convert balloons with
-    | Some((b, p)) ->
-        let totalFlat = flatten b 0
-
-        let (totalConsume, peak) = consumePeak p totalFlat
-        let totalLeft = rollUpLeft peak totalConsume
-        let totalRight = rollUpRight peak totalLeft
-
-        finalize peak totalRight
-
+    | Some((b, p)) -> compute b (p, 0)
     | None -> 0
