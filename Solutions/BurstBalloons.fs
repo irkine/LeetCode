@@ -9,14 +9,14 @@ type Balloon = {
 }
 
 let popEm balloons =
-    let rec repeat count fxn b =
+    let rec repeat fxn count b =
          match fxn b with
-         | Some(n) when count > 0 -> repeat (count-1) fxn n
+         | Some(n) when count > 0 -> repeat fxn (count-1) n
          | _ when count > 0 -> None
          | _ -> Some(b)
 
-    let rec movl count = repeat count (fun b -> b.L)
-    let rec movr count = repeat count (fun b -> b.R)
+    let rec movl = repeat (fun b -> b.L)
+    let rec movr = repeat (fun b -> b.R)
 
     // peak is actually the largest value with the largest value on either side:
     // 2  5 [5] 5
@@ -115,6 +115,8 @@ let popEm balloons =
             loop b getNext 0
 
         let rec loop b totalLeft totalRight total =
+
+            // Roll Up Left
             let rec loopl b totalLeft totalRight total first =
                 match b with
                 | { L = Some(l1) } & { L = Some({ L = Some(l2) }) } ->
@@ -124,8 +126,9 @@ let popEm balloons =
                     loop b (totalLeft - l1.Value) totalRight (total + l2.Value * l1.Value * b.Value)
 
                 | { R = Some(r) } when first -> loopr b totalLeft totalRight total (not first)
-                | _ -> (total, b)
+                | _ -> (b, total)
 
+            // Roll Up Right
             and loopr b totalLeft totalRight total first =
                 match b with
                 | { R = Some(r1) } & { R = Some({ R = Some(r2) }) } ->
@@ -135,7 +138,7 @@ let popEm balloons =
                     loop b totalLeft (totalRight - r1.Value) (total + b.Value * r1.Value * r2.Value)
 
                 | { L = Some(l) } when first -> loopl b totalLeft totalRight total (not first)
-                | _ -> (total, b)
+                | _ -> (b, total)
             
             match b with
             | { L = Some(l) ; R = Some(r) } when totalLeft + totalRight <= l.Value * r.Value ->
@@ -153,7 +156,10 @@ let popEm balloons =
                 then loopl b totalLeft totalRight total true
                 else loopr b totalLeft totalRight total true
 
-            | _ -> (total, b)
+            | { L = Some(l) } -> loopl b totalLeft totalRight total false
+            | { R = Some(r) } -> loopr b totalLeft totalRight total false
+
+            | _ -> (b, total)
 
         let b = (handleRun peak true).Value
 
@@ -161,24 +167,6 @@ let popEm balloons =
         let totalRight = totalRun b (fun b -> b.R)
 
         loop b totalLeft totalRight total
-
-    let rec rollUpLeft (p, total) =
-        match p with
-        | { L = Some(l1) } & { L = Some({ L = Some(l2) }) } ->
-            p.L <- Some(l2)
-            l2.R <- Some(p)
-
-            rollUpLeft (p, (total + l2.Value * l1.Value * p.Value))
-        | _ -> (p, total)
-
-    let rec rollUpRight (p, total) =
-        match p with
-        | { R = Some(r1) } & { R = Some({ R = Some(r2) }) } ->
-            p.R <- Some(r2)
-            r2.L <- Some(p)
-
-            rollUpRight (p, (total + p.Value * r1.Value * r2.Value))
-        | _ -> (p, total)
 
     let finalize (b, total) =
         let possibleTotals =
@@ -206,12 +194,7 @@ let popEm balloons =
             
         total + (Array.max possibleTotals)
 
-    let compute b =
-        flatten b
-        >> consumePeak
-        >> rollUpLeft
-        >> rollUpRight
-        >> finalize
+    let compute b = flatten b >> consumePeak >> finalize
 
     match convert balloons with
     | Some((b, p)) -> compute b (p, 0)
