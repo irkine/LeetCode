@@ -9,14 +9,14 @@ type Balloon = {
 }
 
 let popEm balloons =
-    let rec repeat count fxn b =
+    let rec repeat fxn count b =
          match fxn b with
-         | Some(n) when count > 0 -> repeat (count-1) fxn n
+         | Some(n) when count > 0 -> repeat fxn (count-1) n
          | _ when count > 0 -> None
          | _ -> Some(b)
 
-    let rec movl count = repeat count (fun b -> b.L)
-    let rec movr count = repeat count (fun b -> b.R)
+    let rec movl = repeat (fun b -> b.L)
+    let rec movr = repeat (fun b -> b.R)
 
     let convert balloons =
         let rec rlink balloons =
