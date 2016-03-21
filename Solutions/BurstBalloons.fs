@@ -18,6 +18,10 @@ let popEm balloons =
     let rec movl count = repeat count (fun b -> b.L)
     let rec movr count = repeat count (fun b -> b.R)
 
+    // peak is actually the largest value with the largest value on either side:
+    // 2  5 [5] 5
+    // 3 [5] 5  2
+    // 2  5 [5] 3
     let convert balloons =
         let rec rlink balloons =
             match balloons with
@@ -93,7 +97,7 @@ let popEm balloons =
                 consumeMinima next (total + l.Value * b.Value * r.Value)
 
             | _ -> (b, total)
-
+            
         match findMinima b with
         | Some(m) ->
             let (b', total') = consumeMinima m total
@@ -111,6 +115,28 @@ let popEm balloons =
             loop b getNext 0
 
         let rec loop b totalLeft totalRight total =
+            let rec loopl b totalLeft totalRight total first =
+                match b with
+                | { L = Some(l1) } & { L = Some({ L = Some(l2) }) } ->
+                    b.L <- Some(l2)
+                    l2.R <- Some(b)
+
+                    loop b (totalLeft - l1.Value) totalRight (total + l2.Value * l1.Value * b.Value)
+
+                | { R = Some(r) } when first -> loopr b totalLeft totalRight total (not first)
+                | _ -> (total, b)
+
+            and loopr b totalLeft totalRight total first =
+                match b with
+                | { R = Some(r1) } & { R = Some({ R = Some(r2) }) } ->
+                    b.R <- Some(r2)
+                    r2.L <- Some(b)
+
+                    loop b totalLeft (totalRight - r1.Value) (total + b.Value * r1.Value * r2.Value)
+
+                | { L = Some(l) } when first -> loopl b totalLeft totalRight total (not first)
+                | _ -> (total, b)
+            
             match b with
             | { L = Some(l) ; R = Some(r) } when totalLeft + totalRight <= l.Value * r.Value ->
                 let newTotal = total + l.Value * b.Value * r.Value
@@ -121,8 +147,13 @@ let popEm balloons =
                 if l.Value > r.Value
                 then loop l (totalLeft - l.Value) totalRight             newTotal
                 else loop r totalLeft             (totalRight - r.Value) newTotal
+                
+            | { L = Some(l) ; R = Some(r) } ->
+                if l.Value > r.Value
+                then loopl b totalLeft totalRight total true
+                else loopr b totalLeft totalRight total true
 
-            | _ -> (b, total)
+            | _ -> (total, b)
 
         let b = (handleRun peak true).Value
 
