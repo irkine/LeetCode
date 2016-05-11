@@ -59,8 +59,9 @@
     <Compile Include="BurstBalloons.fs" />
     <Compile Include="CoinChange.fs" />
     <Compile Include="HouseRobber.fs" />
-    <Compile Include="Itenerary.fs" />
+    <Compile Include="LexicalDedupe.fs" />
     <Content Include="App.config" />
+    <Compile Include="Itenerary.fs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
