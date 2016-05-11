@@ -48,19 +48,19 @@ let popEm balloons =
             | ( _ , Some(n) ) when n.Value = v ->
                 loop n v e1 getNext getPrev (count+1)
 
-            // Left Greater
+            // Next Edge Greater
             | ( Some(e), Some(n) ) when e.Value < n.Value ->
                 if findMiddle
                 then getPrev ((count - 1 + count % 2)/2) b
                 else getPrev 1 n
 
-            // Left Only
-            | ( None, Some(n) ) when count % 2 = 0 ->
+            // Next Edge Only
+            | ( None, Some(n) ) ->
                 if findMiddle
                 then getPrev ((count - 1 + count % 2)/2) b
                 else getPrev 1 n
 
-            // Right Only or Greater
+            // Previous Edge Only, Greater; or no Edges
             | _ ->
                 if findMiddle
                 then getPrev (count / 2) b
@@ -126,8 +126,8 @@ let popEm balloons =
 
         let b = (handleRun peak true).Value
 
-        let totalLeft  = totalRun b (fun b -> b.L)
-        let totalRight = totalRun b (fun b -> b.R)
+        let totalLeft  = totalRun b (movl 1)
+        let totalRight = totalRun b (movr 1)
 
         loop b totalLeft totalRight total
 
